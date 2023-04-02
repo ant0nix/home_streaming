@@ -19,8 +19,13 @@ func (h *Handler)InitRouters() *gin.Engine{
 	router := gin.New()
 
 	torrents:= router.Group("/download")
-	{
+	{	
 		torrents.GET("/",h.Download)
 	}
+	start := router.Group("/start")
+	{
+		start.GET("/", h.StartPage)
+	}
+	router.LoadHTMLGlob("./templates/*")
 	return router
 }
