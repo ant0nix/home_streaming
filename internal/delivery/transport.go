@@ -7,13 +7,13 @@ import (
 )
 
 func (h *Handler) StartPage(c *gin.Context) {
-
 	c.HTML(http.StatusOK, "index.html", gin.H{"title": "home page"})
 }
 
 func (h *Handler) Download(c *gin.Context) {
-	//ВРЕМЕННО Тестовое решение
-	err := h.usecase.StartDownload("file.torrent")
+	link:= c.PostForm("link")
+
+	err := h.usecase.StartDownload(link)
 	if err != nil {
 		newErrorResponce(c, err.Error(), http.StatusInternalServerError)
 		return

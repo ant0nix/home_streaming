@@ -1,6 +1,10 @@
 package entities
 
-import "github.com/anacrolix/torrent"
+import (
+	"net/http"
+
+	"github.com/anacrolix/torrent"
+)
 
 type TorrnetClient struct {
 	Client *torrent.Client
@@ -8,6 +12,16 @@ type TorrnetClient struct {
 
 type TorrentConfig struct {
 	config *torrent.ClientConfig
+}
+
+type HttpClient struct {
+	Client *http.Client
+}
+
+func NewHttpClient() *HttpClient {
+	return &HttpClient{
+		Client: &http.Client{},
+	}
 }
 
 // TODO: реальная настройка конфига
@@ -31,4 +45,3 @@ func (tc *TorrnetClient) NewTorrentClient(cfg TorrentConfig) (*TorrnetClient, er
 func (tc *TorrnetClient) NewTorrent(fileName string) (*torrent.Torrent, error) {
 	return tc.Client.AddTorrentFromFile(fileName)
 }
-

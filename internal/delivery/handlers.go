@@ -20,7 +20,7 @@ func (h *Handler)InitRouters() *gin.Engine{
 
 	torrents:= router.Group("/download")
 	{	
-		torrents.GET("/",h.Download)
+		torrents.POST("/",h.Download)
 	}
 	start := router.Group("/start")
 	{

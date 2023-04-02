@@ -1,10 +1,13 @@
 package usecase
 
 import (
+	"io"
+	"io/ioutil"
 	"log"
 	"time"
 
 	"github.com/anacrolix/torrent"
+	"github.com/ant0nix/home_streaming/internal/entities"
 )
 
 type UseCase struct {
@@ -26,7 +29,29 @@ func New(it ITorrents) *UseCase {
 // }
 
 func (us *UseCase) StartDownload(fileName string) error {
-	torrent, err := us.torents.NewTorrent(fileName)
+
+	client := entities.NewHttpClient()
+	resp, err := client.Client.Get(fileName)
+	if err != nil {
+		log.Println("No such web-site:",err.Error())
+		return err
+	}
+	defer resp.Body.Close()
+
+	tmpfile, err := ioutil.TempFile("", "example")
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	defer tmpfile.Close()
+
+	_, err = io.Copy(tmpfile, resp.Body)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	torrent, err := us.torents.NewTorrent(tmpfile.Name())
 	if err != nil {
 		log.Printf("Error with start downloading: %s", err.Error())
 		return err

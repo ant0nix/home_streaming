@@ -21,6 +21,7 @@ func main() {
 	cfg := entities.NewTorrentConfig()
 	internal := entities.TorrnetClient{}
 	client, err := internal.NewTorrentClient(*cfg)
+	defer client.Client.Close()
 	if err != nil {
 		log.Println(err)
 	}
