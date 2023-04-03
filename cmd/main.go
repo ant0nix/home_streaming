@@ -9,8 +9,8 @@ import (
 
 	streaming "github.com/ant0nix/home_streaming"
 	"github.com/ant0nix/home_streaming/internal/delivery"
-	"github.com/ant0nix/home_streaming/internal/entities"
 	"github.com/ant0nix/home_streaming/internal/usecase"
+	torrentClient "github.com/ant0nix/home_streaming/internal/usecase/torrent-client"
 	"github.com/spf13/viper"
 )
 
@@ -18,14 +18,17 @@ func main() {
 	if err := initConfigs(); err != nil {
 		log.Fatalf("Error with config initializing! Error:%s", err.Error())
 	}
-	cfg := entities.NewTorrentConfig()
-	internal := entities.TorrnetClient{}
-	client, err := internal.NewTorrentClient(*cfg)
-	defer client.Client.Close()
+
+	cfg := torrentClient.NewConfig()
+	tclient, err := torrentClient.New(*cfg)
+	if err != nil {
+		log.Fatalf("Error with starting torrent client: %s", err.Error())
+	}
+	defer tclient.Client.Close()
 	if err != nil {
 		log.Println(err)
 	}
-	uc := usecase.New(client)
+	uc := usecase.New(tclient)
 	handler := delivery.NewHandler(uc)
 	srv := new(streaming.Server)
 	go func() {

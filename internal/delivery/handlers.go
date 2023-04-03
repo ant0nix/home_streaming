@@ -5,22 +5,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct{
-	usecase usecase.UseCase
+type Handler struct {
+	usecase usecase.IUseCases
 }
 
-func NewHandler(uc *usecase.UseCase) *Handler{
+func NewHandler(uc usecase.IUseCases) *Handler {
 	return &Handler{
-		usecase: *uc,
+		usecase: uc,
 	}
 }
 
-func (h *Handler)InitRouters() *gin.Engine{
+func (h *Handler) InitRouters() *gin.Engine {
 	router := gin.New()
 
-	torrents:= router.Group("/download")
-	{	
-		torrents.POST("/",h.Download)
+	torrents := router.Group("/download")
+	{
+		torrents.POST("/", h.Download)
+	}
+	stream := router.Group("/videos")
+	{
+		stream.GET("/:filename", h.Play)
 	}
 	start := router.Group("/start")
 	{
