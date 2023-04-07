@@ -15,7 +15,8 @@ func (h *Handler) StartPage(c *gin.Context) {
 
 func (h *Handler) Download(c *gin.Context) {
 	link := c.PostForm("link")
-	torrentFile, err := h.usecase.StartDownload(link)
+
+	torrentFile, err := h.usecase.StartDownload(link, c)
 	if err != nil {
 		newErrorResponce(c, err.Error(), http.StatusInternalServerError)
 		return
@@ -30,11 +31,12 @@ func (h *Handler) Play(c *gin.Context) {
 		return
 	}
 	os.Rename("videos/"+filename, "videos/"+deleteSpaces(filename))
+	os.Remove("videos/" + filename)
 	filename = deleteSpaces(filename)
 
 	outputVideoPath, err := h.usecase.ConvertToMP4(filename)
-	if err != nil{
-		newErrorResponce(c,err.Error(),500)
+	if err != nil {
+		newErrorResponce(c, err.Error(), 500)
 	}
 	_, err = os.Stat(outputVideoPath)
 	if err != nil {

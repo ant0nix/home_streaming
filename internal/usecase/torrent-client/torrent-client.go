@@ -1,6 +1,7 @@
 package torrentClient
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/anacrolix/torrent"
+	"github.com/gin-gonic/gin"
 )
 
 type TorrnetClient struct {
@@ -42,7 +44,7 @@ func (tc *TorrnetClient) NewTorrent(fileName string) (*torrent.Torrent, error) {
 	return tc.Client.AddTorrentFromFile(fileName)
 }
 
-func (tc *TorrnetClient) StartDownload(fileName string) (*torrent.Torrent, error) {
+func (tc *TorrnetClient) StartDownload(fileName string, c *gin.Context) (*torrent.Torrent, error) {
 	client := &http.Client{}
 	resp, err := client.Get(fileName)
 	if err != nil {
@@ -78,16 +80,22 @@ func (tc *TorrnetClient) StartDownload(fileName string) (*torrent.Torrent, error
 	var yetDownloaded int64
 
 	for !torrentFile.Complete.Bool() {
-		download := torrentFile.BytesCompleted() - yetDownloaded
-		logTime(starttime)
-		logSpeed(download)
-		if download == 0 {
+		select {
+		case <-c.Writer.CloseNotify():
+			torrentFile.Drop()
+			return nil, errors.New("client closed connection")
+		default:
+			download := torrentFile.BytesCompleted() - yetDownloaded
+			logTime(starttime)
+			logSpeed(download)
+			if download == 0 {
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			logProgress(*torrentFile, &flag)
+			yetDownloaded = torrentFile.BytesCompleted()
 			time.Sleep(5 * time.Second)
-			continue
 		}
-		logProgress(*torrentFile, &flag)
-		yetDownloaded = torrentFile.BytesCompleted()
-		time.Sleep(5 * time.Second)
 	}
 	log.Println("Downloading has completed!")
 	return torrentFile, nil

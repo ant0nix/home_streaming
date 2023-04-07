@@ -7,16 +7,14 @@ import (
 	"github.com/anacrolix/torrent"
 )
 
-func logTime(time time.Time) {
-	if time.Second() < 1 {
+func logTime(timE time.Time) {
+	if timE.Second() < 1 {
 		return
 	}
-	if time.Second()/60 < 1 {
-		log.Printf("Time has passed: %d s", time.Second())
-		return
+	if time.Since(timE).Seconds() < 60 {
+		log.Printf("Time:%ds", int(time.Since(timE).Seconds()))
 	} else {
-		log.Printf("Time has passed: %dm%ds", time.Minute(), time.Second())
-		return
+		log.Printf("Time:%dm %ds", int(time.Since(timE).Minutes()), int(time.Since(timE).Seconds())-60)
 	}
 }
 
@@ -36,8 +34,4 @@ func logSpeed(downloadBytes int64) {
 
 func logProgress(torrent torrent.Torrent, flag *bool) {
 	log.Printf("Downloaded: %d%%\n", torrent.BytesCompleted()*100/torrent.Length())
-	if !*flag && torrent.BytesCompleted()*100/torrent.Length() >= 25 {
-		log.Println("You can to start wathcing a film")
-		*flag = true
-	}
 }

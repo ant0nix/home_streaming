@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/anacrolix/torrent"
+	"github.com/gin-gonic/gin"
 )
 
 type UseCase struct {
@@ -19,8 +20,8 @@ func New(it ITorrents) *UseCase {
 	}
 }
 
-func (us *UseCase) StartDownload(fileName string) (*torrent.Torrent, error) {
-	return us.torents.StartDownload(fileName)
+func (us *UseCase) StartDownload(fileName string, c *gin.Context) (*torrent.Torrent, error) {
+	return us.torents.StartDownload(fileName, c)
 }
 
 func (us *UseCase) ConvertToMP4(fileName string) (string, error) {
@@ -41,5 +42,6 @@ func (us *UseCase) ConvertToMP4(fileName string) (string, error) {
 			return "", err
 		}
 	}
+	os.Remove(videoPath)
 	return outputVideoPath, nil
 }
