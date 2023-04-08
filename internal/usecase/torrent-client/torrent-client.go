@@ -49,7 +49,7 @@ func (tc *TorrnetClient) StartDownload(fileName string, c *gin.Context) (*torren
 	resp, err := client.Get(fileName)
 	if err != nil {
 		log.Println("No such web-site:", err.Error())
-		return &torrent.Torrent{}, err
+		return &torrent.Torrent{}, errors.New("no such web-site")
 	}
 	defer resp.Body.Close()
 

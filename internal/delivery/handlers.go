@@ -29,6 +29,7 @@ func (h *Handler) InitRouters() *gin.Engine {
 	start := router.Group("/start")
 	{
 		start.GET("/", h.StartPage)
+		start.GET("/w", h.StartPage)
 	}
 	router.LoadHTMLGlob("./templates/*")
 	return router

@@ -10,14 +10,22 @@ import (
 )
 
 func (h *Handler) StartPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{"title": "home page"})
+	log.Println(c.Request.URL.Path)
+	if c.Request.URL.Path == "/start/w" {
+		c.HTML(http.StatusOK, "index2.html", gin.H{"title": "home pageW"})
+	} else {
+		c.HTML(http.StatusOK, "index.html", gin.H{"title": "home page"})
+	}
 }
 
 func (h *Handler) Download(c *gin.Context) {
 	link := c.PostForm("link")
-
 	torrentFile, err := h.usecase.StartDownload(link, c)
 	if err != nil {
+		if err.Error() == "no such web-site" {
+			c.Redirect(301, "/start/w")
+			return
+		}
 		newErrorResponce(c, err.Error(), http.StatusInternalServerError)
 		return
 	}
